@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ควบคุมและแสดงสถานะอุปกรณ์</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-size: 24px;
+      text-align: center;
+      padding-top: 50px;
+      font-family: sans-serif;
+    }
+    .status-on {
+      color: green;
+      font-weight: bold;
+    }
+    .status-off {
+      color: red;
+      font-weight: bold;
+    }
+    button {
+      font-size: 24px;
+      padding: 10px 30px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .on {
+      background-color: green;
+      color: white;
+    }
+    .off {
+      background-color: red;
+      color: white;
+    }
+    hr {
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>สถานะอุปกรณ์</h2>
+  <div id="status" class="status-off">กำลังโหลด...</div>
+
+  <hr>
+
+  <h2>ควบคุมอุปกรณ์</h2>
+  <button class="on" onclick="setStatus(1)">เปิด</button>
+  <button class="off" onclick="setStatus(0)">ปิด</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqNn0ZciV42R3GoHu4vqZR855VmdoLoFA",
+      authDomain: "myg4iot-5f64b.firebaseapp.com",
+      projectId: "myg4iot-5f64b",
+      storageBucket: "myg4iot-5f64b.firebasestorage.app",
+      messagingSenderId: "961540479677",
+      appId: "1:961540479677:web:2427cb7db5fefc7d4735d4",
+      measurementId: "G-BN137F8V8S"
+    };
+
+    // ตรวจสอบไม่ให้ initialize ซ้ำ
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // อัปเดตสถานะแบบ real-time
+    const statusDiv = document.getElementById("status");
+    db.collection("devices").doc("device1")
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          const status = doc.data().status;
+          if (status === 1) {
+            statusDiv.textContent = "เปิด";
+            statusDiv.className = "status-on";
+          } else {
+            statusDiv.textContent = "ปิด";
+            statusDiv.className = "status-off";
+          }
+        } else {
+          statusDiv.textContent = "ไม่มีข้อมูล";
+        }
+      });
+
+    // ฟังก์ชันเปลี่ยนสถานะ
+    function setStatus(value) {
+      db.collection("devices").doc("device1").set({
+        status: value
+      }).then(() => {
+        console.log("เปลี่ยนสถานะเป็น", value);
+      });
+    }
+  </script>
+</body>
+</html>
